@@ -20,6 +20,10 @@ func NewPlayer(id int) *Player {
 		Health:         100,
 		Floor:          1,
 		KilledMonsters: make(map[int]int),
+		TimeInDungeon: TimeInDungeon{
+			FloorEntryTime: make(map[int]time.Time),
+			FloorClearTime: make(map[int]time.Time),
+		},
 	}
 }
 
@@ -28,6 +32,6 @@ type TimeInDungeon struct {
 	BossEntryTime    time.Time
 	BossKilledTime   time.Time
 	ExitDungeonTime  time.Time
-	FloorEntry       []int
-	FloorExit        []int
+	FloorEntryTime   map[int]time.Time
+	FloorClearTime   map[int]time.Time
 }
