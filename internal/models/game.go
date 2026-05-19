@@ -5,10 +5,10 @@ import "time"
 type Game struct {
 	Players      map[int]*Player
 	PlayersCount int
-	Floors       int       `json:"Floors"`
-	Monsters     int       `json:"Monsters"`
-	OpenAt       time.Time `json:"OpenAt"`
-	Duration     time.Time `json:"Duration"`
+	Floors       int           `json:"Floors"`
+	Monsters     int           `json:"Monsters"`
+	OpenAt       time.Time     `json:"OpenAt"`
+	Duration     time.Duration `json:"Duration"`
 }
 
 func NewGame() *Game {

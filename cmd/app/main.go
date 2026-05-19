@@ -27,11 +27,15 @@ func main() {
 	err = json.Unmarshal(configData, &game)
 
 	scanner := bufio.NewScanner(inputFile)
+	closeTime := game.OpenAt.Add(game.Duration)
 	for scanner.Scan() {
 		line := scanner.Text()
 		event, err := parser.ParseLine(line)
 		if err != nil {
 			log.Fatal(err)
+		}
+		if event.Time.After(closeTime) {
+			break
 		}
 		player := game.Players[event.PlayerID]
 		if player == nil {
@@ -42,12 +46,14 @@ func main() {
 				player.IsDisqualified = true
 				player.EntryDungeonTime = event.Time
 				player.ExitDungeonTime = event.Time
+				fmt.Printf("[%s] ", event.Time.Format("15:04:05"))
 				fmt.Printf("Player [%d] is disqualified\n", event.PlayerID)
 			}
 		}
 		if player.IsDisqualified || player.IsDead {
 			continue
 		}
+		fmt.Printf("[%s] ", event.Time.Format("15:04:05"))
 		switch event.ID {
 		case 1:
 			fmt.Printf("Player [%d] registered\n", player.ID)
@@ -110,6 +116,7 @@ func main() {
 			player.Health -= damage
 			fmt.Printf("Player [%d] received [%s] of damage\n", player.ID, event.Extra)
 			if player.Health < 0 {
+				fmt.Printf("[%s] ", event.Time.Format("15:04:05"))
 				fmt.Printf("Player [%d] is dead\n", player.ID)
 				player.IsDead = true
 				player.ExitDungeonTime = event.Time
@@ -159,6 +166,9 @@ func main() {
 		bossKillTime := "00:00:00"
 		if !player.BossKilledTime.IsZero() {
 			bossKillTime = formatDuration(player.BossKilledTime.Sub(player.BossEntryTime))
+		}
+		if player.ExitDungeonTime.IsZero() && status == "SUCCESS" {
+			player.ExitDungeonTime = closeTime
 		}
 		dungeonTime := formatDuration(player.ExitDungeonTime.Sub(player.EntryDungeonTime))
 		fmt.Fprintf(outputFile, "[%s] %d [%s %s %s] HP: %d\n", status, id, dungeonTime, avgDuration, bossKillTime, player.Health)
