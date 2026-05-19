@@ -13,27 +13,26 @@ import (
 )
 
 func main() {
-	file, err := os.Open("data/events")
+	inputFile, err := os.Open("data/input/events")
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer file.Close()
+	defer inputFile.Close()
 
 	game := models.NewGame()
-	configData, err := os.ReadFile("data/config.json")
+	configData, err := os.ReadFile("data/input/config.json")
 	if err != nil {
 		log.Fatal(err)
 	}
 	err = json.Unmarshal(configData, &game)
 
-	scanner := bufio.NewScanner(file)
+	scanner := bufio.NewScanner(inputFile)
 	for scanner.Scan() {
 		line := scanner.Text()
 		event, err := parser.ParseLine(line)
 		if err != nil {
 			log.Fatal(err)
 		}
-		//fmt.Println(event.PlayerID, event.ID)
 		player := game.Players[event.PlayerID]
 		if player == nil {
 			player = models.NewPlayer(event.PlayerID)
@@ -121,7 +120,13 @@ func main() {
 	if err := scanner.Err(); err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("Final report")
+	outputFile, err := os.Create("data/output/final_report.txt")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer outputFile.Close()
+
+	fmt.Fprintf(outputFile, "Final report\n")
 	for id := 1; id <= game.PlayersCount; id++ {
 		player := game.Players[id]
 		var status string
@@ -156,7 +161,7 @@ func main() {
 			bossKillTime = formatDuration(player.BossKilledTime.Sub(player.BossEntryTime))
 		}
 		dungeonTime := formatDuration(player.ExitDungeonTime.Sub(player.EntryDungeonTime))
-		fmt.Printf("[%s] %d [%s %s %s] HP: %d\n", status, id, dungeonTime, avgDuration, bossKillTime, player.Health)
+		fmt.Fprintf(outputFile, "[%s] %d [%s %s %s] HP: %d\n", status, id, dungeonTime, avgDuration, bossKillTime, player.Health)
 	}
 }
 
