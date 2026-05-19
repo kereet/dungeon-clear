@@ -11,8 +11,8 @@ func ParseLine(line string) (event *models.Event, err error) {
 	arr := strings.Split(line, " ")
 	timeStr, playerID, eventID := arr[0], arr[1], arr[2]
 	var extra string
-	if len(arr) == 4 {
-		extra = arr[3]
+	if len(arr) > 3 {
+		extra = strings.Join(arr[3:], " ")
 	}
 	t, err := time.Parse("15:04:05", strings.Trim(timeStr, "[]"))
 	if err != nil {
