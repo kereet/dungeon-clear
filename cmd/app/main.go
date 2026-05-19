@@ -15,16 +15,16 @@ import (
 func main() {
 	inputFile, err := os.Open("data/input/events")
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("Failed to open events file ", err)
 	}
 	defer inputFile.Close()
 
 	game := models.NewGame()
 	configData, err := os.ReadFile("data/input/config.json")
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("Failed to read config json ", err)
 	}
-	err = json.Unmarshal(configData, &game)
+	json.Unmarshal(configData, &game)
 
 	scanner := bufio.NewScanner(inputFile)
 	closeTime := game.OpenAt.Add(game.Duration)
@@ -32,7 +32,7 @@ func main() {
 		line := scanner.Text()
 		event, err := parser.ParseLine(line)
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal("Failed to parse event line ", err)
 		}
 		if event.Time.After(closeTime) {
 			break
@@ -101,7 +101,7 @@ func main() {
 		case 10:
 			health, err := strconv.Atoi(event.Extra)
 			if err != nil {
-				log.Fatal(err)
+				log.Fatal("Invalid health value ", err)
 			}
 			player.Health += health
 			if player.Health > 100 {
@@ -111,7 +111,7 @@ func main() {
 		case 11:
 			damage, err := strconv.Atoi(event.Extra)
 			if err != nil {
-				log.Fatal(err)
+				log.Fatal("Invalid damage value ", err)
 			}
 			player.Health -= damage
 			fmt.Printf("Player [%d] received [%s] of damage\n", player.ID, event.Extra)
@@ -125,11 +125,11 @@ func main() {
 		}
 	}
 	if err := scanner.Err(); err != nil {
-		log.Fatal(err)
+		log.Fatal("Error reading events file ", err)
 	}
 	outputFile, err := os.Create("data/output/final_report.txt")
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("Error creating output file ", err)
 	}
 	defer outputFile.Close()
 
